@@ -1,0 +1,202 @@
+{
+    "metadata": {
+        "version": "1.0",
+        "updated": "2025-01-03",
+        "currency": "CLP",
+        "country": "Chile"
+    },
+    "categorias": {
+        "Celulares": {
+            "productos": [
+                {
+                    "id": "iphone-15-128",
+                    "nombre": "iPhone 15 128GB",
+                    "marca": "Apple",
+                    "precio_nuevo": 950000,
+                    "precio_usado_excelente": 700000,
+                    "precio_usado_bueno": 600000,
+                    "precio_compra_max": 475000,
+                    "liquidez": "alta",
+                    "dias_venta_promedio": 3,
+                    "factores_descuento": {
+                        "bateria_bajo_80": -0.15,
+                        "sin_caja": -0.10,
+                        "pantalla_rayada": -0.20
+                    }
+                },
+                {
+                    "id": "iphone-14-128",
+                    "nombre": "iPhone 14 128GB",
+                    "marca": "Apple",
+                    "precio_nuevo": 800000,
+                    "precio_usado_excelente": 550000,
+                    "precio_usado_bueno": 475000,
+                    "precio_compra_max": 375000,
+                    "liquidez": "alta",
+                    "dias_venta_promedio": 3
+                },
+                {
+                    "id": "iphone-13-128",
+                    "nombre": "iPhone 13 128GB",
+                    "marca": "Apple",
+                    "precio_nuevo": 650000,
+                    "precio_usado_excelente": 425000,
+                    "precio_usado_bueno": 375000,
+                    "precio_compra_max": 325000,
+                    "liquidez": "alta",
+                    "dias_venta_promedio": 2
+                },
+                {
+                    "id": "samsung-s24-256",
+                    "nombre": "Samsung Galaxy S24 256GB",
+                    "marca": "Samsung",
+                    "precio_nuevo": 850000,
+                    "precio_usado_excelente": 600000,
+                    "precio_usado_bueno": 500000,
+                    "precio_compra_max": 425000,
+                    "liquidez": "alta",
+                    "dias_venta_promedio": 4
+                },
+                {
+                    "id": "samsung-s23-256",
+                    "nombre": "Samsung Galaxy S23 256GB",
+                    "marca": "Samsung",
+                    "precio_nuevo": 650000,
+                    "precio_usado_excelente": 425000,
+                    "precio_usado_bueno": 375000,
+                    "precio_compra_max": 300000,
+                    "liquidez": "alta",
+                    "dias_venta_promedio": 4
+                }
+            ]
+        },
+        "Consolas": {
+            "productos": [
+                {
+                    "id": "ps5-slim-disco",
+                    "nombre": "PlayStation 5 Slim Disco",
+                    "marca": "Sony",
+                    "precio_nuevo": 600000,
+                    "precio_usado_excelente": 475000,
+                    "precio_usado_bueno": 425000,
+                    "precio_compra_max": 325000,
+                    "liquidez": "alta",
+                    "dias_venta_promedio": 3
+                },
+                {
+                    "id": "ps5-slim-digital",
+                    "nombre": "PlayStation 5 Slim Digital",
+                    "marca": "Sony",
+                    "precio_nuevo": 480000,
+                    "precio_usado_excelente": 375000,
+                    "precio_usado_bueno": 325000,
+                    "precio_compra_max": 260000,
+                    "liquidez": "alta",
+                    "dias_venta_promedio": 4
+                },
+                {
+                    "id": "xbox-series-x",
+                    "nombre": "Xbox Series X",
+                    "marca": "Microsoft",
+                    "precio_nuevo": 550000,
+                    "precio_usado_excelente": 400000,
+                    "precio_usado_bueno": 350000,
+                    "precio_compra_max": 275000,
+                    "liquidez": "media",
+                    "dias_venta_promedio": 7
+                },
+                {
+                    "id": "nintendo-switch-oled",
+                    "nombre": "Nintendo Switch OLED",
+                    "marca": "Nintendo",
+                    "precio_nuevo": 380000,
+                    "precio_usado_excelente": 280000,
+                    "precio_usado_bueno": 240000,
+                    "precio_compra_max": 190000,
+                    "liquidez": "alta",
+                    "dias_venta_promedio": 4
+                }
+            ]
+        },
+        "Herramientas": {
+            "productos": [
+                {
+                    "id": "makita-taladro-18v",
+                    "nombre": "Taladro Inalámbrico Makita 18V",
+                    "marca": "Makita",
+                    "precio_nuevo": 180000,
+                    "precio_usado_excelente": 120000,
+                    "precio_usado_bueno": 90000,
+                    "precio_compra_max": 72000,
+                    "liquidez": "media",
+                    "dias_venta_promedio": 7
+                },
+                {
+                    "id": "dewalt-taladro-20v",
+                    "nombre": "Taladro Inalámbrico DeWalt 20V",
+                    "marca": "DeWalt",
+                    "precio_nuevo": 200000,
+                    "precio_usado_excelente": 130000,
+                    "precio_usado_bueno": 100000,
+                    "precio_compra_max": 80000,
+                    "liquidez": "media",
+                    "dias_venta_promedio": 7
+                },
+                {
+                    "id": "bosch-rotomartillo",
+                    "nombre": "Rotomartillo Bosch Professional",
+                    "marca": "Bosch",
+                    "precio_nuevo": 250000,
+                    "precio_usado_excelente": 160000,
+                    "precio_usado_bueno": 130000,
+                    "precio_compra_max": 100000,
+                    "liquidez": "media",
+                    "dias_venta_promedio": 10
+                }
+            ]
+        },
+        "Computación": {
+            "productos": [
+                {
+                    "id": "macbook-air-m2",
+                    "nombre": "MacBook Air M2 256GB",
+                    "marca": "Apple",
+                    "precio_nuevo": 1100000,
+                    "precio_usado_excelente": 800000,
+                    "precio_usado_bueno": 700000,
+                    "precio_compra_max": 550000,
+                    "liquidez": "media",
+                    "dias_venta_promedio": 7
+                },
+                {
+                    "id": "macbook-air-m1",
+                    "nombre": "MacBook Air M1 256GB",
+                    "marca": "Apple",
+                    "precio_nuevo": 850000,
+                    "precio_usado_excelente": 550000,
+                    "precio_usado_bueno": 475000,
+                    "precio_compra_max": 375000,
+                    "liquidez": "media",
+                    "dias_venta_promedio": 7
+                },
+                {
+                    "id": "ipad-10gen",
+                    "nombre": "iPad 10ª Generación 64GB",
+                    "marca": "Apple",
+                    "precio_nuevo": 450000,
+                    "precio_usado_excelente": 320000,
+                    "precio_usado_bueno": 275000,
+                    "precio_compra_max": 225000,
+                    "liquidez": "alta",
+                    "dias_venta_promedio": 5
+                }
+            ]
+        }
+    },
+    "reglas_globales": {
+        "descuento_minimo_comprar": 0.40,
+        "descuento_optimo_comprar": 0.50,
+        "margen_minimo_aceptable": 0.15,
+        "margen_optimo": 0.30
+    }
+}
