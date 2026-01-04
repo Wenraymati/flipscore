@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 from backend.config import get_settings
-from backend.services.claude_client import ClaudeClient
+from backend.services.gemini_client import GeminiClient
 from backend.models.schemas import (
     EvaluateRequest, 
     EvaluateResponse,
@@ -22,7 +22,7 @@ class EvaluatorService:
     """Servicio principal de evaluación de deals."""
     
     def __init__(self):
-        self.claude = ClaudeClient()
+        self.client = GeminiClient()
         self.reference_prices = self._load_reference_prices()
     
     def _load_reference_prices(self) -> dict:
@@ -62,7 +62,7 @@ class EvaluatorService:
             EvaluateResponse con evaluación completa
         """
         # Llamar a Claude para evaluación
-        ai_result = self.claude.evaluate_deal(
+        ai_result = self.client.evaluate_deal(
             producto=request.producto,
             precio=request.precio_publicado,
             descripcion=request.descripcion,
