@@ -36,7 +36,7 @@ class EvaluateRequest(BaseModel):
                           description="Nombre/descripción del producto")
     precio_publicado: LenientInt = Field(..., gt=0, le=50000000,
                                    description="Precio en CLP")
-    descripcion: Optional[str] = Field(None, max_length=1000,
+    descripcion: Optional[str] = Field(None, max_length=5000,
                                         description="Descripción del vendedor")
     categoria: Optional[Categoria] = Field(None,
                                             description="Categoría (auto-detecta si vacío)")
