@@ -201,6 +201,10 @@ class EvaluatorService:
                 # Handle singular/plural specifically for autos
                 if "automóvil" in cat_str.lower() and member == Categoria.AUTOMOVILES:
                     return member
-            
+                    
+                # Handle Bicicletas (Deportes/Bicicletas)
+                if ("bicicleta" in cat_str.lower() or "deportes" in cat_str.lower()) and member == Categoria.BICICLETAS:
+                    return member
+
             logger.warning(f"Categoría desconocida '{cat_str}'. Fallback a OTRO.")
             return Categoria.OTRO
