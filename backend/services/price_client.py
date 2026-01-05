@@ -162,9 +162,7 @@ class PriceClient:
                     except:
                         pass
             
-                    except:
-                        pass
-            
+
             # Filtrar outliers también en web search
             prices_clean = self._filter_outliers(prices) if prices else []
             
