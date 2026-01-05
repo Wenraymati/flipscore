@@ -138,8 +138,11 @@ class PriceClient:
             
             prices = []
             
-            # Regex mejorado para capturar: $ 5.000, 5.000, 500.000, 1.2M (quizas no M, pero si puntos)
-            price_pattern = re.compile(r'(?:\$|CLP|Valor|Precio)?\s*(\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?)', re.IGNORECASE)
+            # Regex mejorado para capturar:
+            # 1. $ 5.000.000 (standard)
+            # 2. $5000000 (plain digits with symbol)
+            # 3. 5.000.000 (dot separated without symbol)
+            price_pattern = re.compile(r'(?:(?:\$|CLP|Valor|Precio)\s*(\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?|\d{4,8})|(\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?))', re.IGNORECASE)
             
             for r in results:
                 title = r.get('title', '')
@@ -153,8 +156,11 @@ class PriceClient:
                 matches = price_pattern.findall(text)
                 for m in matches:
                     try:
+                        # Extract non-empty group
+                        raw_str = m[0] if m[0] else m[1]
+                        
                         # Limpiar puntos y comas
-                        clean_str = m.replace('.', '').split(',')[0]
+                        clean_str = raw_str.replace('.', '').split(',')[0]
                         clean_price = int(clean_str)
                         
                         # Filtro heurístico:

@@ -12,4 +12,4 @@ google-auth
 python-multipart
 groq>=0.4.0
 extra-streamlit-components>=0.1.60
-duckduckgo-search>=5.0.0
+ddgs>=5.0.0
