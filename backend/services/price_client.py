@@ -35,9 +35,26 @@ class PriceClient:
         for word in stop_words:
             clean = re.sub(r'\b' + word + r'\b', '', clean)
             
-        # Quitar caracteres especiales y espacios extra
         clean = re.sub(r'[^\w\s]', '', clean)
         return " ".join(clean.split())
+
+    def _filter_outliers(self, prices: List[int]) -> List[int]:
+        """Filtra precios usando Rango Intercuartil (IQR) para eliminar outliers."""
+        if len(prices) < 4: return prices
+        
+        sorted_prices = sorted(prices)
+        n = len(sorted_prices)
+        q1 = sorted_prices[n // 4]
+        q3 = sorted_prices[3 * n // 4]
+        iqr = q3 - q1
+        
+        lower_bound = q1 - 1.5 * iqr
+        upper_bound = q3 + 1.5 * iqr
+        
+        filtered = [x for x in prices if lower_bound <= x <= upper_bound]
+        
+        # Safety check: si borramos todo, devolvemos original (menos los muy bajos)
+        return filtered if filtered else [p for p in prices if p > 5000]
 
     async def fetch_market_data(self, product_name: str, limit: int = 20) -> Dict:
         """
@@ -84,14 +101,19 @@ class PriceClient:
                 if not prices:
                     return self._empty_stats()
                 
+                # Filtrar Outliers (Nuevo)
+                prices_clean = self._filter_outliers(prices)
+                if not prices_clean: 
+                     prices_clean = prices # Revertir si filtramos todo agresivamente
+                
                 # Calculate stats
                 stats = {
                     "source": "MercadoLibre Chile (Used)",
-                    "count": len(prices),
-                    "min": min(prices),
-                    "max": max(prices),
-                    "avg": int(statistics.mean(prices)),
-                    "median": int(statistics.median(prices)),
+                    "count": len(prices_clean),
+                    "min": min(prices_clean),
+                    "max": max(prices_clean),
+                    "avg": int(statistics.mean(prices_clean)),
+                    "median": int(statistics.median(prices_clean)),
                     "prices_sample": sorted(prices)[:5], # Cheapest 5
                     "timestamp": datetime.now().isoformat()
                 }
@@ -140,18 +162,24 @@ class PriceClient:
                     except:
                         pass
             
-            if not prices:
-                logger.warning("Web Search Backup returned no valid prices.")
+                    except:
+                        pass
+            
+            # Filtrar outliers también en web search
+            prices_clean = self._filter_outliers(prices) if prices else []
+            
+            if not prices_clean:
+                logger.warning("Web Search Backup returned no valid prices (after filter).")
                 return self._empty_stats()
                 
             stats = {
                 "source": "Web Search (Backup)",
-                "count": len(prices),
-                "min": min(prices),
-                "max": max(prices),
-                "avg": int(statistics.mean(prices)),
-                "median": int(statistics.median(prices)),
-                "prices_sample": sorted(prices)[:5],
+                "count": len(prices_clean),
+                "min": min(prices_clean),
+                "max": max(prices_clean),
+                "avg": int(statistics.mean(prices_clean)),
+                "median": int(statistics.median(prices_clean)),
+                "prices_sample": sorted(prices_clean)[:5],
                 "timestamp": datetime.now().isoformat()
             }
             logger.info(f"Web Search success: {stats}")

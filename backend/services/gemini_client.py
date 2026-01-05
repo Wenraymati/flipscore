@@ -104,14 +104,44 @@ Proporciona tu evaluación en formato JSON con la siguiente estructura:
             raise ValueError(f"Error llamando a Gemini: {e}")
 
     def _get_mock_response(self, producto: str, precio: int) -> dict:
+        """Retorna respuesta dummy completa para evitar errores de validación."""
         return {
-            "recomendacion": {
-                "decision": "ERROR_CONFIG",
-                "razonamiento": "No se pudo conectar con Gemini API.",
-                "acciones_sugeridas": ["Verificar API Key"]
+            "clasificacion": {
+                "categoria": "Otro",
+                "producto_identificado": producto,
+                "condicion_inferida": "Desconocido",
+                "confianza": 0.0
             },
-            "evaluacion": {"score_total": 0},
-            "analisis_precio": {"precio_publicado": precio},
-            "proyeccion": {},
-            "alertas": ["Error de configuración API"]
+            "analisis_precio": {
+                "precio_publicado": precio,
+                "precio_referencia_nuevo": 0,
+                "precio_referencia_usado": 0,
+                "descuento_vs_nuevo": 0.0,
+                "descuento_vs_usado": 0.0,
+                "precio_max_compra": 0
+            },
+            "evaluacion": {
+                "score_descuento": 0.0,
+                "score_liquidez": 0.0,
+                "score_condicion": 0.0,
+                "score_vendedor": 0.0,
+                "score_margen": 0.0,
+                "score_total": 0.0
+            },
+            "proyeccion": {
+                "precio_venta_esperado": 0,
+                "margen_bruto": 0,
+                "margen_porcentaje": 0.0,
+                "tiempo_venta_dias": "N/A",
+                "liquidez": "Desconocida"
+            },
+            "senales_positivas": [],
+            "senales_negativas": [],
+            "alertas": ["Error conectando con servicio de IA. Intente nuevamente."],
+            "recomendacion": {
+                "decision": "ALERTA_RIESGO",
+                "confianza": 0.0,
+                "razonamiento": "No se pudo realizar la evaluación automática por error técnico.",
+                "acciones_sugeridas": ["Reintentar en unos minutos"]
+            }
         }
