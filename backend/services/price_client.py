@@ -4,7 +4,7 @@ import statistics
 from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 import re
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 
 logger = logging.getLogger(__name__)
 
