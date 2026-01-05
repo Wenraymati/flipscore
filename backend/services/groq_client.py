@@ -18,7 +18,10 @@ Contexto actual:
 - Precios Referencia (DB Interna): {precios_referencia}
 - Datos Mercado En Vivo (MercadoLibre): {market_data}
 
+
 Salida requerida: JSON válido estrictamente.
+IMPORTANTE: El campo "decision" DEBE ser uno de estos valores exactos:
+["COMPRAR_YA", "COMPRAR", "NEGOCIAR", "PASAR", "ALERTA_RIESGO"]
 """
 
 class GroqClient:

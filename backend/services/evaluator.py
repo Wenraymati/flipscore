@@ -112,9 +112,15 @@ class EvaluatorService:
         }
         
         try:
-            decision_enum = Recomendacion(decision)
-        except ValueError:
-            logger.warning(f"Decisión inválida de IA: '{decision}'. Fallback a NEGOCIAR.")
+            # Intenta conversión directa o fuzzy
+            try:
+                decision_enum = Recomendacion(decision)
+            except ValueError:
+                decision_enum = Recomendacion.from_fuzzy(decision)
+                logger.info(f"Fuzzy mapped '{decision}' to {decision_enum}")
+
+        except Exception as e:
+            logger.warning(f"Error mapeando decisión '{decision}': {e}. Fallback NEGOCIAR.")
             decision_enum = Recomendacion.NEGOCIAR
 
         return EvaluateResponse(
