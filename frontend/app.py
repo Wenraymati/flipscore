@@ -86,7 +86,7 @@ def save_lead_to_sheets(email: str, data: dict):
         return False
 
 # ============ CONTADOR DE USO & COOKIES ============
-@st.cache_resource(experimental_allow_widgets=True)
+@st.cache_resource
 def get_manager():
     return stx.CookieManager()
 
