@@ -3,8 +3,11 @@ import logging
 from pathlib import Path
 from typing import Optional
 
+from typing import Optional
+from backend.services.price_client import PriceClient
 from backend.config import get_settings
 from backend.services.gemini_client import GeminiClient
+from backend.services.groq_client import GroqClient
 from backend.models.schemas import (
     EvaluateRequest, 
     EvaluateResponse,
@@ -22,7 +25,15 @@ class EvaluatorService:
     """Servicio principal de evaluación de deals."""
     
     def __init__(self):
-        self.client = GeminiClient()
+        settings = get_settings()
+        if settings.ai_provider == "groq":
+            self.client = GroqClient()
+            logger.info("Using AI Provider: Groq (Llama 3.3)")
+        else:
+            self.client = GeminiClient()
+            logger.info("Using AI Provider: Gemini")
+            
+        self.price_client = PriceClient()
         self.reference_prices = self._load_reference_prices()
     
     def _load_reference_prices(self) -> dict:
@@ -61,12 +72,16 @@ class EvaluatorService:
         Returns:
             EvaluateResponse con evaluación completa
         """
-        # Llamar a Claude para evaluación
+        # 1. Obtener datos de mercado en tiempo real (si es posible)
+        market_data = await self.price_client.fetch_market_data(request.producto)
+        
+        # 2. Llamar a IA con contexto enriquecido
         ai_result = self.client.evaluate_deal(
             producto=request.producto,
             precio=request.precio_publicado,
             descripcion=request.descripcion,
-            precios_referencia=self.reference_prices
+            precios_referencia=self.reference_prices,
+            market_data=market_data
         )
         
         # Transformar a response estructurado
@@ -96,44 +111,50 @@ class EvaluatorService:
             "ALERTA_RIESGO": "🚨"
         }
         
+        try:
+            decision_enum = Recomendacion(decision)
+        except ValueError:
+            logger.warning(f"Decisión inválida de IA: '{decision}'. Fallback a NEGOCIAR.")
+            decision_enum = Recomendacion.NEGOCIAR
+
         return EvaluateResponse(
             clasificacion=Clasificacion(
-                categoria=clasif.get("categoria", "Otro"),
-                producto_identificado=clasif.get("producto_identificado", ""),
-                condicion_inferida=clasif.get("condicion_inferida", "Bueno"),
-                confianza=clasif.get("confianza", 0.5)
+                categoria=clasif.get("categoria") or "Otro",
+                producto_identificado=clasif.get("producto_identificado") or "",
+                condicion_inferida=clasif.get("condicion_inferida") or "Bueno",
+                confianza=clasif.get("confianza") or 0.5
             ),
             analisis_precio=AnalisisPrecio(
-                precio_publicado=precio.get("precio_publicado", 0),
-                precio_referencia_nuevo=precio.get("precio_referencia_nuevo", 0),
-                precio_referencia_usado=precio.get("precio_referencia_usado", 0),
-                descuento_vs_nuevo=precio.get("descuento_vs_nuevo", 0),
-                descuento_vs_usado=precio.get("descuento_vs_usado", 0),
-                precio_max_compra=precio.get("precio_max_compra", 0)
+                precio_publicado=precio.get("precio_publicado") or 0,
+                precio_referencia_nuevo=precio.get("precio_referencia_nuevo") or 0,
+                precio_referencia_usado=precio.get("precio_referencia_usado") or 0,
+                descuento_vs_nuevo=precio.get("descuento_vs_nuevo") or 0.0,
+                descuento_vs_usado=precio.get("descuento_vs_usado") or 0.0,
+                precio_max_compra=precio.get("precio_max_compra") or 0
             ),
             evaluacion=Evaluacion(
-                score_descuento=eval_data.get("score_descuento", 0),
-                score_liquidez=eval_data.get("score_liquidez", 0),
-                score_condicion=eval_data.get("score_condicion", 0),
-                score_vendedor=eval_data.get("score_vendedor", 0),
-                score_margen=eval_data.get("score_margen", 0),
+                score_descuento=eval_data.get("score_descuento") or 0.0,
+                score_liquidez=eval_data.get("score_liquidez") or 0.0,
+                score_condicion=eval_data.get("score_condicion") or 0.0,
+                score_vendedor=eval_data.get("score_vendedor") or 0.0,
+                score_margen=eval_data.get("score_margen") or 0.0,
                 score_total=score
             ),
             proyeccion=Proyeccion(
-                precio_venta_esperado=proy.get("precio_venta_esperado", 0),
+                precio_venta_esperado=proy.get("precio_venta_esperado") or 0,
                 margen_bruto=margen,
                 margen_porcentaje=margen_pct,
-                tiempo_venta_dias=proy.get("tiempo_venta_dias", "N/A"),
-                liquidez=proy.get("liquidez", "media")
+                tiempo_venta_dias=proy.get("tiempo_venta_dias") or "N/A",
+                liquidez=proy.get("liquidez") or "media"
             ),
             senales_positivas=ai_result.get("senales_positivas", []),
             senales_negativas=ai_result.get("senales_negativas", []),
             alertas=ai_result.get("alertas", []),
             recomendacion=RecomendacionDetalle(
-                decision=Recomendacion(decision),
-                confianza=rec.get("confianza", 0.5),
-                razonamiento=rec.get("razonamiento", ""),
-                acciones_sugeridas=rec.get("acciones_sugeridas", [])
+                decision=decision_enum,
+                confianza=rec.get("confianza") or 0.5,
+                razonamiento=rec.get("razonamiento") or "",
+                acciones_sugeridas=rec.get("acciones_sugeridas") or []
             ),
             # Displays para UI
             score_display=f"{score:.1f}/10",

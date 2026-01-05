@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     
     # Precios
     reference_prices_path: str = "backend/data/reference_prices.json"
+    ai_provider: str = "groq" # Options: gemini, groq
     
     class Config:
         env_file = ".env"

@@ -273,8 +273,14 @@ with tab1:
                     
                     display_results(result)
                     
+                except httpx.HTTPStatusError as e:
+                    if e.response.status_code == 422:
+                        detail = e.response.json().get("detail", str(e))
+                        st.error(f"Error de Validación (422): {detail}")
+                    else:
+                        st.error(f"Error del Servidor: {e.response.status_code}")
                 except Exception as e:
-                    st.error(f"Error: {e}")
+                    st.error(f"Error de Conexión: {e}")
         else:
             st.warning("Ingresa el producto")
 

@@ -15,7 +15,9 @@ Usa los precios de referencia proporcionados para calcular márgenes.
 Contexto actual:
 - Temporada: {temporada}
 - Fecha: {fecha_actual}
-- Precios Referencia: {precios_referencia}
+- Fecha: {fecha_actual}
+- Precios Referencia (DB Interna): {precios_referencia}
+- Datos Mercado En Vivo (MercadoLibre): {market_data}
 
 Salida requerida: JSON válido estrictamente.
 """
@@ -45,7 +47,8 @@ class GeminiClient:
         producto: str,
         precio: int,
         descripcion: Optional[str],
-        precios_referencia: Dict
+        precios_referencia: Dict,
+        market_data: Optional[Dict] = None
     ) -> Dict:
         """
         Evalúa una oportunidad de compra usando Gemini.
@@ -59,7 +62,8 @@ class GeminiClient:
         system_content = SYSTEM_PROMPT.format(
             temporada=self._get_temporada(),
             fecha_actual=datetime.now().strftime("%Y-%m-%d"),
-            precios_referencia=json.dumps(precios_referencia, indent=2, ensure_ascii=False)
+            precios_referencia=json.dumps(precios_referencia, indent=2, ensure_ascii=False),
+            market_data=json.dumps(market_data or {}, indent=2, ensure_ascii=False)
         )
         
         user_prompt = f"""
