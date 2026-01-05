@@ -133,36 +133,36 @@ class PriceClient:
         """Fallback: Busca precios en la web usando DuckDuckGo."""
         try:
             logger.info(f"Iniciando Web Search Backup para: {query}")
-            results = DDGS().text(f"precio {query} site:mercadolibre.cl OR site:chileautos.cl OR site:yapo.cl", region="cl-es", max_results=15)
+            # Query más amplia sin restricciones de sitio tan estrictas
+            results = DDGS().text(f"{query} valor precio chile usado", region="cl-es", max_results=20)
             
             prices = []
             
-            # Regex simple para encontrar precios tipo $ 5.000.000 o 5.000.000
-            # Busca patrones como "$ 1.200.300", "$1.200.000", "1.500.000"
-            price_pattern = re.compile(r'[\$\s]*(\d{1,3}(?:\.\d{3})*)')
+            # Regex mejorado para capturar: $ 5.000, 5.000, 500.000, 1.2M (quizas no M, pero si puntos)
+            price_pattern = re.compile(r'(?:\$|CLP|Valor|Precio)?\s*(\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?)', re.IGNORECASE)
             
             for r in results:
                 title = r.get('title', '')
                 body = r.get('body', '')
                 text = f"{title} {body}"
                 
-                # Ignorar si parece ser un accesorio barato
-                if "funda" in text.lower() or "carcasa" in text.lower():
+                # Ignorar accesorios baratos
+                if "funda" in text.lower() or "carcasa" in text.lower() or "mica" in text.lower():
                     continue
 
                 matches = price_pattern.findall(text)
                 for m in matches:
-                    # Limpiar puntos y convertir a int
                     try:
-                        clean_price = int(m.replace('.', ''))
-                        # Filtro heurístico: Precios 'razonables' para ser el producto principal
-                        # Ej: evitar precios de $1.000 o $990 (accesorios/envío)
+                        # Limpiar puntos y comas
+                        clean_str = m.replace('.', '').split(',')[0]
+                        clean_price = int(clean_str)
+                        
+                        # Filtro heurístico:
                         if clean_price > 5000: 
                             prices.append(clean_price)
                     except:
                         pass
             
-
             # Filtrar outliers también en web search
             prices_clean = self._filter_outliers(prices) if prices else []
             
