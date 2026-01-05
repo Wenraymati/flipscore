@@ -103,6 +103,9 @@ def init_usage():
             
     if "user_email" not in st.session_state:
         st.session_state.user_email = None
+        
+    if "last_result" not in st.session_state:
+        st.session_state.last_result = None
 
 init_usage()
 
@@ -290,10 +293,9 @@ with tab1:
                     
                     result = response.json()
                     
+                    st.session_state.last_result = result
                     increment_usage()
                     track_event("evaluation_completed", {"type": "text"})
-                    
-                    display_results(result)
                     
                 except httpx.HTTPStatusError as e:
                     if e.response.status_code == 422:
@@ -305,6 +307,10 @@ with tab1:
                     st.error(f"Error de Conexión: {e}")
         else:
             st.warning("Ingresa el producto")
+
+    # Mostrar resultado persistente si existe (y si es de texto, opcionalmente)
+    if st.session_state.last_result:
+        display_results(st.session_state.last_result)
 
 with tab2:
     st.info("Sube un screenshot de Facebook Marketplace")
@@ -328,12 +334,12 @@ with tab2:
                     result = response.json()
                     
                     if result.get("success", True): # Check success flag if backend sends it
+                        st.session_state.last_result = result
                         increment_usage()
                         track_event("evaluation_completed", {"type": "image"})
                         
                         if "extraccion" in result:
                             st.success(f"Detectado: **{result['extraccion'].get('producto', 'Producto')}**")
-                        display_results(result)
                     else:
                         st.error("Error analizando imagen.")
 
