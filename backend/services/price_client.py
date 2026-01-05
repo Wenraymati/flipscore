@@ -42,7 +42,6 @@ class PriceClient:
         """
         Busca productos usados en ML y calcula estadísticas.
         """
-        """
         try:
             # 0. Limpiar query
             clean_q = self._clean_query(product_name)
