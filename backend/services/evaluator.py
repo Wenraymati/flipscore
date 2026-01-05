@@ -156,12 +156,12 @@ class EvaluatorService:
                 precio_max_compra=precio.get("precio_max_compra") or 0
             ),
             evaluacion=Evaluacion(
-                score_descuento=eval_data.get("score_descuento") or 0.0,
-                score_liquidez=eval_data.get("score_liquidez") or 0.0,
-                score_condicion=eval_data.get("score_condicion") or 0.0,
-                score_vendedor=eval_data.get("score_vendedor") or 0.0,
-                score_margen=eval_data.get("score_margen") or 0.0,
-                score_total=score
+                score_descuento=max(0.0, eval_data.get("score_descuento") or 0.0),
+                score_liquidez=max(0.0, eval_data.get("score_liquidez") or 0.0),
+                score_condicion=max(0.0, eval_data.get("score_condicion") or 0.0),
+                score_vendedor=max(0.0, eval_data.get("score_vendedor") or 0.0),
+                score_margen=max(0.0, eval_data.get("score_margen") or 0.0),
+                score_total=max(0.0, score)
             ),
             proyeccion=Proyeccion(
                 precio_venta_esperado=proy.get("precio_venta_esperado") or 0,
