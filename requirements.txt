@@ -11,3 +11,4 @@ gspread
 google-auth
 python-multipart
 groq>=0.4.0
+extra-streamlit-components>=0.1.60

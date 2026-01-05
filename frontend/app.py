@@ -1,7 +1,8 @@
 import streamlit as st
 import httpx
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
+import extra_streamlit_components as stx
 import gspread
 from google.oauth2.service_account import Credentials
 
@@ -84,14 +85,33 @@ def save_lead_to_sheets(email: str, data: dict):
         print(f"Error saving to sheets: {e}")
         return False
 
-# ============ CONTADOR DE USO ============
+# ============ CONTADOR DE USO & COOKIES ============
+@st.cache_resource(experimental_allow_widgets=True)
+def get_manager():
+    return stx.CookieManager()
+
+cookie_manager = get_manager()
+
 def init_usage():
+    # 1. Intentar recuperar de cookie
+    cookie_val = cookie_manager.get("flipscore_usage")
+    
     if "evaluations_count" not in st.session_state:
-        st.session_state.evaluations_count = 0
+        if cookie_val is not None:
+            st.session_state.evaluations_count = int(cookie_val)
+        else:
+            st.session_state.evaluations_count = 0
+            
     if "user_email" not in st.session_state:
         st.session_state.user_email = None
 
 init_usage()
+
+def increment_usage():
+    st.session_state.evaluations_count += 1
+    # Persistir en cookie por 30 días
+    expires = datetime.now() + timedelta(days=30)
+    cookie_manager.set("flipscore_usage", st.session_state.evaluations_count, expires_at=expires)
 
 # ============ LÍMITE GRATUITO ============
 FREE_LIMIT = 5  # Evaluaciones gratis antes de pedir email
@@ -200,7 +220,8 @@ def show_lead_capture():
             save_lead_to_sheets(email, lead_data)
             
             st.session_state.user_email = email
-            st.session_state.evaluations_count = 0  # Reset contador
+            st.session_state.evaluations_count = 0 
+            cookie_manager.set("flipscore_usage", 0) # Reset cookie también
             
             st.success("¡Gracias! Te desbloqueamos 5 evaluaciones más.")
             st.balloons()
@@ -268,7 +289,9 @@ with tab1:
                     response.raise_for_status()
                     result = response.json()
                     
-                    st.session_state.evaluations_count += 1
+                    result = response.json()
+                    
+                    increment_usage()
                     track_event("evaluation_completed", {"type": "text"})
                     
                     display_results(result)
@@ -306,7 +329,7 @@ with tab2:
                     result = response.json()
                     
                     if result.get("success", True): # Check success flag if backend sends it
-                        st.session_state.evaluations_count += 1
+                        increment_usage()
                         track_event("evaluation_completed", {"type": "image"})
                         
                         if "extraccion" in result:
