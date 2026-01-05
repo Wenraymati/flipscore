@@ -1,6 +1,15 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List
+from pydantic import BaseModel, Field, BeforeValidator
+from typing import Optional, List, Annotated
 from enum import Enum
+
+def coerce_int(v):
+    if v is None: return 0
+    try:
+        return int(float(v))
+    except (ValueError, TypeError):
+        return 0
+
+LenientInt = Annotated[int, BeforeValidator(coerce_int)]
 
 class Categoria(str, Enum):
     CELULARES = "Celulares"
@@ -24,7 +33,7 @@ class EvaluateRequest(BaseModel):
     """Input del usuario para evaluar un deal."""
     producto: str = Field(..., min_length=3, max_length=200, 
                           description="Nombre/descripción del producto")
-    precio_publicado: int = Field(..., gt=0, le=50000000,
+    precio_publicado: LenientInt = Field(..., gt=0, le=50000000,
                                    description="Precio en CLP")
     descripcion: Optional[str] = Field(None, max_length=1000,
                                         description="Descripción del vendedor")

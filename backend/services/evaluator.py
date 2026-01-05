@@ -76,14 +76,30 @@ class EvaluatorService:
         # 1. Obtener datos de mercado en tiempo real (si es posible)
         market_data = await self.price_client.fetch_market_data(request.producto)
         
-        # 2. Llamar a IA con contexto enriquecido
-        ai_result = self.client.evaluate_deal(
-            producto=request.producto,
-            precio=request.precio_publicado,
-            descripcion=request.descripcion,
-            precios_referencia=self.reference_prices,
-            market_data=market_data
-        )
+        # 2. Llamar a IA con contexto enriquecido (Retry 1 vez)
+        max_retries = 2
+        last_error = None
+        
+        for attempt in range(max_retries):
+            try:
+                ai_result = self.client.evaluate_deal(
+                    producto=request.producto,
+                    precio=request.precio_publicado,
+                    descripcion=request.descripcion,
+                    precios_referencia=self.reference_prices,
+                    market_data=market_data
+                )
+                break # Success
+            except Exception as e:
+                logger.warning(f"Intento {attempt+1}/{max_retries} falló: {e}")
+                last_error = e
+                if attempt == max_retries - 1:
+                    # Fallback final si todo falla
+                    logger.error("Todos los intentos fallaron. Usando respuesta mock de error.")
+                    ai_result = self.client._get_mock_response(request.producto, request.precio_publicado)
+                    # O podrías hacer raise last_error si prefieres 500
+                    # Pero mejor retornar algo útil
+                    ai_result["alertas"].append(f"Error AI: {str(e)}")
         
         # Transformar a response estructurado
         return self._build_response(ai_result)
