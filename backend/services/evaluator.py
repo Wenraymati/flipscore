@@ -198,6 +198,9 @@ class EvaluatorService:
             for member in Categoria:
                 if member.value.lower() == cat_str.lower():
                     return member
+                # Handle singular/plural specifically for autos
+                if "automóvil" in cat_str.lower() and member == Categoria.AUTOMOVILES:
+                    return member
             
             logger.warning(f"Categoría desconocida '{cat_str}'. Fallback a OTRO.")
             return Categoria.OTRO
