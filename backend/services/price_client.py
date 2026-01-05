@@ -4,6 +4,7 @@ import statistics
 from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 import re
+from duckduckgo_search import DDGS
 
 logger = logging.getLogger(__name__)
 
@@ -66,15 +67,16 @@ class PriceClient:
                 response = await client.get(self.BASE_URL, params=params, headers=self.headers, timeout=10.0)
                 
                 if response.status_code == 403:
-                    logger.warning("MercadoLibre API 403 Forbidden. Is User-Agent blocked?")
-                    return self._empty_stats()
+                    logger.warning("MercadoLibre API 403 Forbidden. Is User-Agent blocked? Trying Web Search Backup.")
+                    return self._search_web_backup(clean_q)
                 
                 response.raise_for_status()
                 data = response.json()
                 
                 items = data.get("results", [])
                 if not items:
-                    return self._empty_stats()
+                    logger.info("Direct API found nothing. Trying Web Search Backup.")
+                    return self._search_web_backup(clean_q)
                 
                 # Extract prices
                 prices = [item["price"] for item in items if item.get("currency_id") == "CLP"]
@@ -103,6 +105,60 @@ class PriceClient:
                 
         except Exception as e:
             logger.error(f"Error fetching market prices for {product_name}: {e}")
+            return self._empty_stats()
+
+    def _search_web_backup(self, query: str) -> Dict:
+        """Fallback: Busca precios en la web usando DuckDuckGo."""
+        try:
+            logger.info(f"Iniciando Web Search Backup para: {query}")
+            results = DDGS().text(f"precio {query} site:mercadolibre.cl OR site:chileautos.cl OR site:yapo.cl", region="cl-es", max_results=15)
+            
+            prices = []
+            
+            # Regex simple para encontrar precios tipo $ 5.000.000 o 5.000.000
+            # Busca patrones como "$ 1.200.300", "$1.200.000", "1.500.000"
+            price_pattern = re.compile(r'[\$\s]*(\d{1,3}(?:\.\d{3})*)')
+            
+            for r in results:
+                title = r.get('title', '')
+                body = r.get('body', '')
+                text = f"{title} {body}"
+                
+                # Ignorar si parece ser un accesorio barato
+                if "funda" in text.lower() or "carcasa" in text.lower():
+                    continue
+
+                matches = price_pattern.findall(text)
+                for m in matches:
+                    # Limpiar puntos y convertir a int
+                    try:
+                        clean_price = int(m.replace('.', ''))
+                        # Filtro heurístico: Precios 'razonables' para ser el producto principal
+                        # Ej: evitar precios de $1.000 o $990 (accesorios/envío)
+                        if clean_price > 5000: 
+                            prices.append(clean_price)
+                    except:
+                        pass
+            
+            if not prices:
+                logger.warning("Web Search Backup returned no valid prices.")
+                return self._empty_stats()
+                
+            stats = {
+                "source": "Web Search (Backup)",
+                "count": len(prices),
+                "min": min(prices),
+                "max": max(prices),
+                "avg": int(statistics.mean(prices)),
+                "median": int(statistics.median(prices)),
+                "prices_sample": sorted(prices)[:5],
+                "timestamp": datetime.now().isoformat()
+            }
+            logger.info(f"Web Search success: {stats}")
+            return stats
+
+        except Exception as e:
+            logger.error(f"Web Search Backup failed: {e}")
             return self._empty_stats()
 
     def _empty_stats(self) -> Dict:
