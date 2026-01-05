@@ -12,6 +12,7 @@ from backend.models.schemas import (
     EvaluateRequest, 
     EvaluateResponse,
     Clasificacion,
+    Categoria,
     AnalisisPrecio,
     Evaluacion,
     Proyeccion,
@@ -125,7 +126,7 @@ class EvaluatorService:
 
         return EvaluateResponse(
             clasificacion=Clasificacion(
-                categoria=clasif.get("categoria") or "Otro",
+                categoria=self._sanitize_categoria(clasif.get("categoria")),
                 producto_identificado=clasif.get("producto_identificado") or "",
                 condicion_inferida=clasif.get("condicion_inferida") or "Bueno",
                 confianza=clasif.get("confianza") or 0.5
@@ -167,3 +168,20 @@ class EvaluatorService:
             decision_display=f"{decision_icons.get(decision, '❓')} {decision.replace('_', ' ')}",
             margen_display=f"${margen:,} ({margen_pct*100:.0f}%)"
         )
+    
+    def _sanitize_categoria(self, cat_str: Optional[str]) -> Categoria:
+        """Asegura que la categoría sea válida, o retorna OTRO."""
+        if not cat_str:
+            return Categoria.OTRO
+            
+        try:
+            # Intenta match exacto (case sensitive)
+            return Categoria(cat_str)
+        except ValueError:
+            # Match case insensitive
+            for member in Categoria:
+                if member.value.lower() == cat_str.lower():
+                    return member
+            
+            logger.warning(f"Categoría desconocida '{cat_str}'. Fallback a OTRO.")
+            return Categoria.OTRO

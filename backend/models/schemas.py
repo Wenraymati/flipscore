@@ -9,6 +9,7 @@ class Categoria(str, Enum):
     COMPUTACION = "Computación"
     FITNESS = "Fitness"
     BICICLETAS = "Bicicletas"
+    MOTOCICLETAS = "Motocicletas"
     OTRO = "Otro"
 
 class Recomendacion(str, Enum):
